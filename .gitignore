@@ -1,0 +1,4 @@
+node_modules/
+dist/
+.sea-build/
+.DS_Store
