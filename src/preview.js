@@ -42,18 +42,30 @@ global.FontFace = class FontFace {
     this.source = source;
     this.status = "loaded";
   }
-  load() { return Promise.resolve(this); }
+  load() {
+    return Promise.resolve(this);
+  }
 };
 global.window.FontFace = global.FontFace;
 if (!global.document.fonts) {
   global.document.fonts = {
     add() {},
-    check() { return true; },
-    entries() { return [][Symbol.iterator](); },
+    check() {
+      return true;
+    },
+    entries() {
+      return [][Symbol.iterator]();
+    },
     forEach() {},
-    has() { return false; },
-    keys() { return [][Symbol.iterator](); },
-    values() { return [][Symbol.iterator](); },
+    has() {
+      return false;
+    },
+    keys() {
+      return [][Symbol.iterator]();
+    },
+    values() {
+      return [][Symbol.iterator]();
+    },
     ready: Promise.resolve(),
     addEventListener() {},
     removeEventListener() {},
@@ -61,7 +73,12 @@ if (!global.document.fonts) {
 }
 global.window.DOMMatrix = class DOMMatrix {
   constructor() {
-    this.a = 1; this.b = 0; this.c = 0; this.d = 1; this.e = 0; this.f = 0;
+    this.a = 1;
+    this.b = 0;
+    this.c = 0;
+    this.d = 1;
+    this.e = 0;
+    this.f = 0;
   }
 };
 global.window.ResizeObserver = class ResizeObserver {
@@ -71,11 +88,21 @@ global.window.ResizeObserver = class ResizeObserver {
 };
 global.window.requestAnimationFrame = (cb) => setTimeout(cb, 0);
 global.window.cancelAnimationFrame = (id) => clearTimeout(id);
-global.window.matchMedia = () => ({ matches: false, addListener() {}, removeListener() {} });
-global.window.getComputedStyle = () => ({ getPropertyValue() { return ""; } });
+global.window.matchMedia = () => ({
+  matches: false,
+  addListener() {},
+  removeListener() {},
+});
+global.window.getComputedStyle = () => ({
+  getPropertyValue() {
+    return "";
+  },
+});
 global.window.EXCALIDRAW_EXPORT_SOURCE = "excalidraw-preview";
 if (!global.crypto) {
-  try { global.crypto = require("crypto"); } catch {}
+  try {
+    global.crypto = require("crypto");
+  } catch {}
 }
 
 if (!global.URL.createObjectURL) {
@@ -114,7 +141,7 @@ function getBundledFontPaths() {
 
   const assetsDir = path.join(
     __dirname,
-    "node_modules/@excalidraw/utils/dist/prod/assets"
+    "node_modules/@excalidraw/utils/dist/prod/assets",
   );
 
   if (!fs.existsSync(assetsDir)) return [];
@@ -150,7 +177,9 @@ async function convert(inputPath, outputPath) {
     process.exit(1);
   }
 
-  console.log(`Converting ${path.basename(inputPath)} (${elements.length} elements)...`);
+  console.log(
+    `Converting ${path.basename(inputPath)} (${elements.length} elements)...`,
+  );
 
   // Export to SVG
   const svg = await exportToSvg({
@@ -164,7 +193,8 @@ async function convert(inputPath, outputPath) {
     exportPadding: 20,
   });
 
-  let svgString = svg.outerHTML || new dom.window.XMLSerializer().serializeToString(svg);
+  let svgString =
+    svg.outerHTML || new dom.window.XMLSerializer().serializeToString(svg);
 
   // Render SVG to PNG using resvg (fonts loaded natively via fontFiles)
   const fontFiles = getBundledFontPaths();
@@ -182,7 +212,9 @@ async function convert(inputPath, outputPath) {
   const pngBuffer = pngData.asPng();
 
   fs.writeFileSync(outputPath, pngBuffer);
-  console.log(`Saved: ${outputPath} (${Math.round(pngBuffer.length / 1024)} KB)`);
+  console.log(
+    `Saved: ${outputPath} (${Math.round(pngBuffer.length / 1024)} KB)`,
+  );
 }
 
 // ── CLI ──────────────────────────────────────────────────────────────

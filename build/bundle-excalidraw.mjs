@@ -21,17 +21,17 @@ const distDir = join(ROOT, "dist");
 const outFile = join(distDir, "excalidraw.mjs");
 
 if (!existsSync(distDir)) {
-	mkdirSync(distDir, { recursive: true });
+  mkdirSync(distDir, { recursive: true });
 }
 
 // Verify @excalidraw/excalidraw is installed locally
 const excalidrawPkg = join(ROOT, "node_modules", "@excalidraw", "excalidraw");
 if (!existsSync(excalidrawPkg)) {
-	console.error(
-		"Error: @excalidraw/excalidraw not found in node_modules.\n" +
-			"Run 'npm install' first.",
-	);
-	process.exit(1);
+  console.error(
+    "Error: @excalidraw/excalidraw not found in node_modules.\n" +
+      "Run 'npm install' first.",
+  );
+  process.exit(1);
 }
 
 // Write a tiny entry file that re-exports just what we need
@@ -42,33 +42,33 @@ writeFileSync(entryFile, entryCode);
 // Bundle with esbuild (use local install)
 const esbuild = join(ROOT, "node_modules", ".bin", "esbuild");
 const cmd = [
-	`"${esbuild}"`,
-	`"${entryFile}"`,
-	"--bundle",
-	"--format=esm",
-	"--platform=node",
-	`--outfile="${outFile}"`,
-	"--tree-shaking=true",
-	'--define:process.env.NODE_ENV=\\"production\\"',
-	"--log-level=warning",
+  `"${esbuild}"`,
+  `"${entryFile}"`,
+  "--bundle",
+  "--format=esm",
+  "--platform=node",
+  `--outfile="${outFile}"`,
+  "--tree-shaking=true",
+  '--define:process.env.NODE_ENV=\\"production\\"',
+  "--log-level=warning",
 ].join(" ");
 
 console.log("Bundling @excalidraw/excalidraw...");
 
 try {
-	execSync(cmd, {
-		encoding: "utf-8",
-		stdio: "inherit",
-		cwd: ROOT,
-	});
+  execSync(cmd, {
+    encoding: "utf-8",
+    stdio: "inherit",
+    cwd: ROOT,
+  });
 } catch {
-	console.error("esbuild failed.");
-	process.exit(1);
+  console.error("esbuild failed.");
+  process.exit(1);
 }
 
 // Clean up temp entry
 try {
-	unlinkSync(entryFile);
+  unlinkSync(entryFile);
 } catch {}
 
 console.log(`Bundle written to ${outFile}`);

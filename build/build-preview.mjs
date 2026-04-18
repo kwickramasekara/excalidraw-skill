@@ -36,12 +36,12 @@ const ARCH = process.arch;
 // ── Paths ────────────────────────────────────────────────────────────
 const NATIVE_ADDON = path.join(
   ROOT,
-  `node_modules/@resvg/resvg-js-${PLATFORM}-${ARCH}/resvgjs.${PLATFORM}-${ARCH}.node`
+  `node_modules/@resvg/resvg-js-${PLATFORM}-${ARCH}/resvgjs.${PLATFORM}-${ARCH}.node`,
 );
 
 const FONT_DIR = path.join(
   ROOT,
-  "node_modules/@excalidraw/utils/dist/prod/assets"
+  "node_modules/@excalidraw/utils/dist/prod/assets",
 );
 
 // ── Helpers ──────────────────────────────────────────────────────────
@@ -62,59 +62,83 @@ function bundleJS() {
   // which won't work in SEA since __dirname changes)
   const jsdomCSSHelper = path.join(
     ROOT,
-    "node_modules/jsdom/lib/jsdom/living/css/helpers/computed-style.js"
+    "node_modules/jsdom/lib/jsdom/living/css/helpers/computed-style.js",
   );
   const jsdomCSSHelperOriginal = fs.readFileSync(jsdomCSSHelper, "utf-8");
 
   const cssFile = path.join(
     ROOT,
-    "node_modules/jsdom/lib/jsdom/browser/default-stylesheet.css"
+    "node_modules/jsdom/lib/jsdom/browser/default-stylesheet.css",
   );
   const cssContent = fs.readFileSync(cssFile, "utf-8");
   const escaped = JSON.stringify(cssContent);
 
   const patched = jsdomCSSHelperOriginal.replace(
     /const defaultStyleSheet = fs\.readFileSync\([^)]+\),\s*\{[^}]+\}\s*\);/,
-    `const defaultStyleSheet = ${escaped};`
+    `const defaultStyleSheet = ${escaped};`,
   );
   fs.writeFileSync(jsdomCSSHelper, patched);
 
   // Patch css-tree files that use createRequire(import.meta.url) to load JSON.
   const cssTreePatches = [];
 
-  const cssTreeDataPatch = path.join(ROOT, "node_modules/css-tree/lib/data-patch.js");
+  const cssTreeDataPatch = path.join(
+    ROOT,
+    "node_modules/css-tree/lib/data-patch.js",
+  );
   const cssTreeDataPatchOriginal = fs.readFileSync(cssTreeDataPatch, "utf-8");
-  fs.writeFileSync(cssTreeDataPatch,
-    `import patch from '../data/patch.json';\nexport default patch;\n`
+  fs.writeFileSync(
+    cssTreeDataPatch,
+    `import patch from '../data/patch.json';\nexport default patch;\n`,
   );
   cssTreePatches.push([cssTreeDataPatch, cssTreeDataPatchOriginal]);
 
   const cssTreeData = path.join(ROOT, "node_modules/css-tree/lib/data.js");
   const cssTreeDataOriginal = fs.readFileSync(cssTreeData, "utf-8");
-  fs.writeFileSync(cssTreeData,
+  fs.writeFileSync(
+    cssTreeData,
     cssTreeDataOriginal
-      .replace(/import \{ createRequire \} from 'module';\n/, '')
-      .replace(/const require = createRequire\(import\.meta\.url\);\n/, '')
-      .replace(/const mdnAtrules = require\('mdn-data\/css\/at-rules\.json'\);/, "import mdnAtrules from 'mdn-data/css/at-rules.json';")
-      .replace(/const mdnProperties = require\('mdn-data\/css\/properties\.json'\);/, "import mdnProperties from 'mdn-data/css/properties.json';")
-      .replace(/const mdnSyntaxes = require\('mdn-data\/css\/syntaxes\.json'\);/, "import mdnSyntaxes from 'mdn-data/css/syntaxes.json';")
+      .replace(/import \{ createRequire \} from 'module';\n/, "")
+      .replace(/const require = createRequire\(import\.meta\.url\);\n/, "")
+      .replace(
+        /const mdnAtrules = require\('mdn-data\/css\/at-rules\.json'\);/,
+        "import mdnAtrules from 'mdn-data/css/at-rules.json';",
+      )
+      .replace(
+        /const mdnProperties = require\('mdn-data\/css\/properties\.json'\);/,
+        "import mdnProperties from 'mdn-data/css/properties.json';",
+      )
+      .replace(
+        /const mdnSyntaxes = require\('mdn-data\/css\/syntaxes\.json'\);/,
+        "import mdnSyntaxes from 'mdn-data/css/syntaxes.json';",
+      ),
   );
   cssTreePatches.push([cssTreeData, cssTreeDataOriginal]);
 
-  const cssTreeVersion = path.join(ROOT, "node_modules/css-tree/lib/version.js");
+  const cssTreeVersion = path.join(
+    ROOT,
+    "node_modules/css-tree/lib/version.js",
+  );
   const cssTreeVersionOriginal = fs.readFileSync(cssTreeVersion, "utf-8");
-  fs.writeFileSync(cssTreeVersion,
-    `import pkg from '../package.json';\nexport const version = pkg.version;\n`
+  fs.writeFileSync(
+    cssTreeVersion,
+    `import pkg from '../package.json';\nexport const version = pkg.version;\n`,
   );
   cssTreePatches.push([cssTreeVersion, cssTreeVersionOriginal]);
 
   // Patch jsdom's XMLHttpRequest to avoid require.resolve
-  const xhrImpl = path.join(ROOT, "node_modules/jsdom/lib/jsdom/living/xhr/XMLHttpRequest-impl.js");
+  const xhrImpl = path.join(
+    ROOT,
+    "node_modules/jsdom/lib/jsdom/living/xhr/XMLHttpRequest-impl.js",
+  );
   const xhrImplOriginal = fs.readFileSync(xhrImpl, "utf-8");
-  fs.writeFileSync(xhrImpl, xhrImplOriginal.replace(
-    'const syncWorkerFile = require.resolve("./xhr-sync-worker.js");',
-    'const syncWorkerFile = __dirname + "/xhr-sync-worker.js";'
-  ));
+  fs.writeFileSync(
+    xhrImpl,
+    xhrImplOriginal.replace(
+      'const syncWorkerFile = require.resolve("./xhr-sync-worker.js");',
+      'const syncWorkerFile = __dirname + "/xhr-sync-worker.js";',
+    ),
+  );
   cssTreePatches.push([xhrImpl, xhrImplOriginal]);
 
   const outfile = path.join(BUILD_DIR, "bundle.cjs");
@@ -131,7 +155,7 @@ function bundleJS() {
         "--external:*.node",
         "--external:@resvg/resvg-js-*",
         `--outfile="${outfile}"`,
-      ].join(" ")
+      ].join(" "),
     );
   } finally {
     // Restore patched files
@@ -148,9 +172,7 @@ function bundleJS() {
 function createSEAEntry() {
   console.log("\n[2/5] Creating SEA entry wrapper...");
 
-  const fontFiles = fs
-    .readdirSync(FONT_DIR)
-    .filter((f) => f.endsWith(".ttf"));
+  const fontFiles = fs.readdirSync(FONT_DIR).filter((f) => f.endsWith(".ttf"));
 
   const fontExtractLines = fontFiles
     .map((f) => `  extractAsset("${f}", path.join(cacheDir, "${f}"));`)
@@ -160,10 +182,7 @@ function createSEAEntry() {
     .map((f) => `    path.join(cacheDir, "${f}")`)
     .join(",\n");
 
-  let bundleCode = fs.readFileSync(
-    path.join(BUILD_DIR, "bundle.cjs"),
-    "utf-8"
-  );
+  let bundleCode = fs.readFileSync(path.join(BUILD_DIR, "bundle.cjs"), "utf-8");
   bundleCode = bundleCode.replace(/^#!.*\n/, "");
 
   const entryCode = `\
@@ -216,12 +235,12 @@ ${fontPathLines}
   const combinedPath = path.join(BUILD_DIR, "sea-main.cjs");
   fs.writeFileSync(
     combinedPath,
-    entryCode + "\n;(function(){" + bundleCode + "\n})();\n"
+    entryCode + "\n;(function(){" + bundleCode + "\n})();\n",
   );
 
   const combinedSize = fs.statSync(combinedPath).size;
   console.log(
-    `  Combined entry + bundle: ${(combinedSize / 1024 / 1024).toFixed(1)} MB`
+    `  Combined entry + bundle: ${(combinedSize / 1024 / 1024).toFixed(1)} MB`,
   );
 
   return combinedPath;
@@ -235,9 +254,7 @@ async function downloadNodeBinary() {
 
   if (fs.existsSync(cachedNode)) {
     const content = fs.readFileSync(cachedNode);
-    if (
-      content.includes("NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2")
-    ) {
+    if (content.includes("NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2")) {
       console.log("  Using cached official Node.js binary");
       return cachedNode;
     }
@@ -250,7 +267,7 @@ async function downloadNodeBinary() {
   const resp = await fetch(url);
   if (!resp.ok) {
     throw new Error(
-      `Failed to download Node.js binary: ${resp.status} ${resp.statusText}`
+      `Failed to download Node.js binary: ${resp.status} ${resp.statusText}`,
     );
   }
 
@@ -261,7 +278,7 @@ async function downloadNodeBinary() {
   const tarDir = path.join(BUILD_DIR, "node-download");
   ensureDir(tarDir);
   run(
-    `tar -xzf "${tarPath}" -C "${tarDir}" --strip-components=2 "${tarName}/bin/node"`
+    `tar -xzf "${tarPath}" -C "${tarDir}" --strip-components=2 "${tarName}/bin/node"`,
   );
 
   const extractedNode = path.join(tarDir, "node");
@@ -280,9 +297,7 @@ async function downloadNodeBinary() {
 function buildSEA(entryPath, nodeBinary) {
   console.log("\n[4/5] Building single executable...");
 
-  const fontFiles = fs
-    .readdirSync(FONT_DIR)
-    .filter((f) => f.endsWith(".ttf"));
+  const fontFiles = fs.readdirSync(FONT_DIR).filter((f) => f.endsWith(".ttf"));
 
   const assets = {
     "resvgjs.node": NATIVE_ADDON,
@@ -337,7 +352,7 @@ async function main() {
 
   const finalSize = fs.statSync(OUTPUT_BIN).size;
   console.log(
-    `\nDone! Built: ${OUTPUT_BIN} (${(finalSize / 1024 / 1024).toFixed(1)} MB)`
+    `\nDone! Built: ${OUTPUT_BIN} (${(finalSize / 1024 / 1024).toFixed(1)} MB)`,
   );
   console.log(`\nUsage: ./dist/preview <input.excalidraw> [output.png]`);
 }

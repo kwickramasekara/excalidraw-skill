@@ -24,10 +24,19 @@ import readline from "node:readline";
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 const ROOT = path.join(__dirname, "..");
 
-const DEFAULT_SKILL_DIR = path.join(os.homedir(), ".config", "opencode", "skills", "excalidraw");
+const DEFAULT_SKILL_DIR = path.join(
+  os.homedir(),
+  ".config",
+  "opencode",
+  "skills",
+  "excalidraw",
+);
 
 function prompt(question) {
-  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
   return new Promise((resolve) => {
     rl.question(question, (answer) => {
       rl.close();
@@ -73,8 +82,14 @@ for (const stale of ["build.mjs", "convert.mjs", "preview", ".gitignore"]) {
 }
 
 copyFile(path.join(ROOT, "SKILL.md"), path.join(SKILL_DIR, "SKILL.md"));
-copyFile(path.join(ROOT, "src", "convert.mjs"), path.join(SKILL_DIST, "convert.mjs"));
-copyFile(path.join(ROOT, "dist", "excalidraw.mjs"), path.join(SKILL_DIST, "excalidraw.mjs"));
+copyFile(
+  path.join(ROOT, "src", "convert.mjs"),
+  path.join(SKILL_DIST, "convert.mjs"),
+);
+copyFile(
+  path.join(ROOT, "dist", "excalidraw.mjs"),
+  path.join(SKILL_DIST, "excalidraw.mjs"),
+);
 copyFile(path.join(ROOT, "dist", "preview"), path.join(SKILL_DIST, "preview"));
 
 console.log("\nDeploy complete.");
