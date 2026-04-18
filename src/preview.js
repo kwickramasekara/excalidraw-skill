@@ -199,7 +199,7 @@ async function convert(inputPath, outputPath) {
   // Render SVG to PNG using resvg (fonts loaded natively via fontFiles)
   const fontFiles = getBundledFontPaths();
   const resvg = new Resvg(svgString, {
-    fitTo: { mode: "width", value: 2048 },
+    fitTo: { mode: "width", value: 1024 },
     font: {
       fontFiles,
       loadSystemFonts: false,
